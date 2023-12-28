@@ -1,0 +1,14 @@
+FROM centos:8
+
+RUN  sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+RUN  sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+RUN yum update -y
+RUN yum install -y wget gdb perf gcc gcc-c++ make go openssl zlib git curl
+RUN yum clean all 
+
+# build image
+# docker build . -t mycentos:v1
+
+# run
+# docker run -it -v ~/code:/data --name mycentos mycentos /bin/bash
+# docker exec -it mycentos /bin/bash
