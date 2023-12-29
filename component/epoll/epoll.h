@@ -19,38 +19,18 @@
 #define AE_DONT_WAIT (1 << 2)
 
 class AeEventLoop {
- private:
-  typedef void aeFileProc(int fd, void *clientData, int mask);
+ public:
+  using aeFileProc = std::function<void(int fd, void *clientData, int mask)>;
 
  public:
   AeEventLoop(int size);
   ~AeEventLoop();
 
-  /* Resize the maximum set size of the event loop.
-   * If the requested set size is smaller than the current set size, but
-   * there is already a file descriptor in use that is >= the requested
-   * set size minus one, AE_ERR is returned and the operation is not
-   * performed at all.
-   *
-   * Otherwise AE_OK is returned and the operation is successful. */
-  int aeResizeSetSize(int event_size_);
-
-  /* Return the current set size. */
-  int aeGetSetSize() { return event_size_; }
-
-  void aeStop() { stop = 1; }
-
-  /* Tells the next iteration/s of the event processing to set timeout of 0. */
-  void aeSetDontWait(int no_wait) {
-    if (no_wait)
-      flags |= AE_DONT_WAIT;
-    else
-      flags &= ~AE_DONT_WAIT;
+  void aeMain() {
+    while (!stop_) {
+      aeProcessEvents();
+    }
   }
-
-  void *aeGetFileClientData(int fd);
-
-  int aeGetFileEvents(int fd);
 
   /* Process every pending time event, then every pending file event
    * (that may be registered by time event callbacks just processed).
@@ -60,15 +40,9 @@ class AeEventLoop {
    * The function returns the number of events processed. */
   int aeProcessEvents();
 
-  int aeCreateFileEvent(int fd, int mask, aeFileProc *proc, void *clientData);
+  int aeCreateFileEvent(int fd, int mask, aeFileProc proc, void *clientData);
 
   void aeDeleteFileEvent(int fd, int mask);
-
-  void aeMain() {
-    while (!stop) {
-      aeProcessEvents();
-    }
-  }
 
   void aeSetBeforeSleepProc(std::function<void()> beforesleep) {
     beforesleep_ = std::move(beforesleep);
@@ -78,18 +52,37 @@ class AeEventLoop {
     aftersleep_ = std::move(aftersleep);
   }
 
+  /* Resize the maximum set size of the event loop.
+   * If the requested set size is smaller than the current set size, but
+   * there is already a file descriptor in use that is >= the requested
+   * set size minus one, AE_ERR is returned and the operation is not
+   * performed at all.
+   *
+   * Otherwise AE_OK is returned and the operation is successful. */
+  int aeResizeSetSize(int size);
+
+  void aeStop() { stop_ = 1; }
+
+  /* Tells the next iteration/s of the event processing to set timeout of 0. */
+  void aeSetDontWait(int no_wait) {
+    if (no_wait)
+      flags_ |= AE_DONT_WAIT;
+    else
+      flags_ &= ~AE_DONT_WAIT;
+  }
+
  private:
   // epoll api
-  int addEvent(int fd, int mask);
-  void delEvent(int fd, int delmask);
-  int poll(struct timeval *tvp);
+  int aeApiAddEvent(int fd, int mask);
+  void aeApiDelEvent(int fd, int delmask);
+  int aeApiPoll(struct timeval *tvp);
 
  private:
   /* File event structure */
   typedef struct aeFileEvent {
     int mask; /* one of AE_(READABLE|WRITABLE|BARRIER) */
-    aeFileProc *rfileProc;
-    aeFileProc *wfileProc;
+    aeFileProc rfileProc;
+    aeFileProc wfileProc;
     void *clientData;
   } aeFileEvent;
 
@@ -102,11 +95,11 @@ class AeEventLoop {
   int epfd_;
   int maxfd_;      /* highest file descriptor currently registered */
   int event_size_; /* max number of file descriptors tracked */
-  std::vector<struct epoll_event> epoll_events;
-  std::vector<aeFileEvent> events; /* Registered events */
-  std::vector<aeFiredEvent> fired; /* Fired events */
+  std::vector<struct epoll_event> epoll_events_;
+  std::vector<aeFileEvent> events_; /* Registered events */
+  std::vector<aeFiredEvent> fired_; /* Fired events */
   std::function<void()> beforesleep_;
   std::function<void()> aftersleep_;
-  int flags;
-  int stop;
+  int flags_;
+  int stop_;
 };
