@@ -27,7 +27,6 @@ class Logger {
   LogLevel m_level;
   std::ostringstream m_stream;
   static std::mutex m_mutex;
-  static std::vector<std::string> m_level_strs;
 };
 
 // 日志宏定义

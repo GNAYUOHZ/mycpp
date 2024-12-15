@@ -3,7 +3,6 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <strings.h>  // bzero
-#include "logger.h"
 //     /* Structure describing an Internet socket address.  */
 //     struct sockaddr_in {
 //         sa_family_t    sin_family; /* address family: AF_INET */
@@ -33,7 +32,7 @@ InetAddress::InetAddress(const std::string& ip, uint16_t port) {
   addr_.sin_family = AF_INET;
   addr_.sin_port = htons(port);
   if (::inet_pton(AF_INET, ip.c_str(), &addr_.sin_addr) <= 0) {
-    LOG_ERROR << "inet_pton err";
+    // LOG_ERROR << "inet_pton err";
   }
 }
 

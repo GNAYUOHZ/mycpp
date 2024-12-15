@@ -3,8 +3,6 @@
 #include <unistd.h>
 #include "gtest/gtest.h"
 
-using namespace reactor;
-
 class BufferTest : public testing::Test {
   void SetUp() override {}
   void TearDown() override {}

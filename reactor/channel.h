@@ -5,6 +5,10 @@
 
 namespace reactor {
 
+const int kNew = -1;
+const int kAdded = 1;
+const int kDeleted = 2;
+
 class EventLoop;
 
 ///
@@ -42,6 +46,8 @@ class Channel {
   void set_index(int idx) { index_ = idx; }
 
   EventLoop* ownerLoop() { return loop_; }
+
+  std::string eventsToString();
 
  private:
   static const int kNoneEvent;

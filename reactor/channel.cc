@@ -1,7 +1,7 @@
 #include "channel.h"
 #include <sstream>
+#include "common/logger/logger.h"
 #include "eventloop.h"
-#include "logger.h"
 
 #include <poll.h>
 
@@ -12,12 +12,11 @@ const int Channel::kReadEvent = POLLIN | POLLPRI;
 const int Channel::kWriteEvent = POLLOUT;
 
 Channel::Channel(EventLoop* loop, int fd)
-    : loop_(loop), fd_(fd), events_(0), revents_(0), index_(-1) {
+    : loop_(loop), fd_(fd), events_(0), revents_(0), index_(kNew) {
   LOG_INFO << "new channel, fd = " << fd_;
 }
 
-
- // todo 需处理close问题
+// todo 需处理close问题
 void Channel::handleEvent(int64_t receiveTime) {
   eventHandling_ = true;
   if (revents_ & POLLNVAL) {
@@ -65,4 +64,17 @@ void Channel::disableWriting() {
   events_ &= ~kWriteEvent;
   loop_->updateChannel(this);
   LOG_INFO << "disableWriting, fd = " << fd() << " events = " << events();
+}
+
+std::string Channel::eventsToString() {
+  std::ostringstream oss;
+  if (events_ & POLLIN) oss << "IN ";
+  if (events_ & POLLPRI) oss << "PRI ";
+  if (events_ & POLLOUT) oss << "OUT ";
+  if (events_ & POLLHUP) oss << "HUP ";
+  if (events_ & POLLRDHUP) oss << "RDHUP ";
+  if (events_ & POLLERR) oss << "ERR ";
+  if (events_ & POLLNVAL) oss << "NVAL ";
+
+  return oss.str();
 }

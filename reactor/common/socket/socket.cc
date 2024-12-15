@@ -1,17 +1,18 @@
 #include "socket.h"
 
-#include "InetAddress.h"
-
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <strings.h>  // bzero
 #include <unistd.h>
-#include "logger.h"
+#include "reactor/common/InetAddress/InetAddress.h"
+#include "reactor/common/logger/logger.h"
 using namespace reactor;
 
 Socket::~Socket() {
   if (::close(sockfd_) < 0) {
     LOG_ERROR << "sockets::close err";
+  } else {
+    LOG_INFO << "sockets::close succ";
   }
 }
 
@@ -80,12 +81,8 @@ void Socket::setReuseAddr(bool on) {
   ::setsockopt(sockfd_, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
 }
 
-
-
-void Socket::shutdownWrite()
-{
-  if (::shutdown(sockfd_, SHUT_WR) < 0)
-  {
+void Socket::shutdownWrite() {
+  if (::shutdown(sockfd_, SHUT_WR) < 0) {
     LOG_ERROR << "sockets::shutdownWrite error";
   }
 }

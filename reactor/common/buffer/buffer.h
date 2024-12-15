@@ -6,8 +6,6 @@
 #include <string>
 #include <vector>
 
-namespace reactor {
-
 /// @code
 /// +-------------------+------------------+------------------+
 /// | prependable bytes |  readable bytes  |  writable bytes  |
@@ -81,5 +79,3 @@ class Buffer {
   size_t writerIndex_;
   static const char kCRLF[];
 };
-
-}  // namespace reactor

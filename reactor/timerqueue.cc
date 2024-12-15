@@ -5,9 +5,8 @@
 #include <unistd.h>
 #include <chrono>
 #include <cstring>
+#include "common/logger/logger.h"
 #include "eventloop.h"
-#include "logger.h"
-#include "timer.h"
 
 using namespace reactor;
 
@@ -53,7 +52,6 @@ TimerQueue::TimerQueue(EventLoop* loop)
       timers_() {
   timerfdChannel_.setReadCallback(std::bind(&TimerQueue::handleRead, this));
   timerfdChannel_.enableReading();
-  LOG_DEBUG << "starting TimerQueue";
 }
 
 TimerQueue::~TimerQueue() {
@@ -64,7 +62,7 @@ TimerQueue::~TimerQueue() {
   }
 }
 
-void TimerQueue::addTimer(const EventCallback& cb, int64_t when, int64_t interval) {
+void TimerQueue::addTimer(const TimerEventCallback& cb, int64_t when, int64_t interval) {
   Timer* timer = new Timer(cb, when, interval);
   bool earliestChanged = insert(timer);
 

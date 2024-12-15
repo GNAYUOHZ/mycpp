@@ -7,11 +7,33 @@
 namespace reactor {
 
 class EventLoop;
-class Timer;
+
+class Timer {
+  using TimerEventCallback = std::function<void()>;
+
+ public:
+  Timer(const TimerEventCallback& cb, int64_t when, double interval)
+      : callback_(cb), expiration_(when), interval_(interval), repeat_(interval > 0.0) {}
+
+  Timer(const Timer&) = delete;
+  Timer& operator=(const Timer&) = delete;
+
+  void run() const { callback_(); }
+  int64_t expiration() const { return expiration_; }
+  bool repeat() const { return repeat_; }
+  void restart(int64_t now) { expiration_ = now + interval_; }
+
+ private:
+  const TimerEventCallback callback_;
+  int64_t expiration_;
+  const double interval_;
+  const bool repeat_;
+};
 
 class TimerQueue {
+  using TimerEventCallback = std::function<void()>;
+
  public:
-  using EventCallback = std::function<void()>;
   TimerQueue(EventLoop* loop);
   ~TimerQueue();
   TimerQueue(const TimerQueue&) = delete;
@@ -21,7 +43,7 @@ class TimerQueue {
   /// Schedules the callback to be run at given time,
   /// repeats if @c interval > 0.0.
   ///
-  void addTimer(const EventCallback& cb, int64_t when, int64_t interval);
+  void addTimer(const TimerEventCallback& cb, int64_t when, int64_t interval);
 
   // void cancel(TimerId timerId);
 

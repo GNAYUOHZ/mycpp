@@ -1,11 +1,9 @@
 #pragma once
+#include <poll.h>
 #include <functional>
 #include <memory>
 #include <thread>
-#include <unordered_map>
 #include <vector>
-
-struct epoll_event;
 
 namespace reactor {
 class Channel;
@@ -13,8 +11,6 @@ class TimerQueue;
 
 class EventLoop {
   typedef std::vector<Channel*> ChannelList;
-  typedef std::vector<struct epoll_event> EventList;
-  typedef std::function<void()> TimerEventCallback;
 
  public:
   EventLoop();
@@ -41,16 +37,14 @@ class EventLoop {
 
  private:
   /// Changes the interested I/O events.
-  void update(int operation, Channel* channel);
+  void fillActiveChannels(int numEvents, ChannelList* activeChannels) const;
 
  private:
   bool looping_; /* atomic */
+  const std::thread::id threadId_;
   std::unique_ptr<TimerQueue> timerQueue_;
-
-  // epoll
-  static const int kInitEventListSize = 16;
-  EventList events_;
-  int epollfd_;
+  std::vector<struct pollfd> pollfds_;
+  std::unordered_map<int, Channel*> channels_;
 };
 
 }  // namespace reactor

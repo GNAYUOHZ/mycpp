@@ -1,10 +1,9 @@
 #pragma once
 
-#include "InetAddress.h"
-
 #include <functional>
 #include <memory>
-#include "buffer.h"
+#include "common/InetAddress/InetAddress.h"
+#include "common/buffer/buffer.h"
 
 namespace reactor {
 class Channel;

@@ -2,9 +2,9 @@
 #include "tcpconnection.h"
 
 #include "channel.h"
+#include "common/logger/logger.h"
+#include "common/socket/socket.h"
 #include "eventloop.h"
-#include "logger.h"
-#include "socket.h"
 
 #include <errno.h>
 #include <netinet/in.h>

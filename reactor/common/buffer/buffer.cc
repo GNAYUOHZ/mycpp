@@ -1,5 +1,3 @@
-#pragma once
-
 #include "buffer.h"
 
 #include <endian.h>
@@ -8,8 +6,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cstring>
-
-namespace reactor {
 
 const char Buffer::kCRLF[] = "\r\n";
 const size_t Buffer::kCheapPrepend;
@@ -163,5 +159,3 @@ ssize_t Buffer::readFd(int fd, int* savedErrno) {
 
 char* Buffer::begin() { return &*buffer_.begin(); }
 const char* Buffer::begin() const { return &*buffer_.begin(); }
-
-}  // namespace reactor
